@@ -2200,8 +2200,8 @@ gsap.to(panels, {
   // ─── Three.js: Shader ────────────────────────────────────────────────
   {
     id: 'thjs-plasma',
-    name: 'Plasma Shader',
-    cat: 'threejs-shader',
+    title: 'Plasma Shader',
+    category: 'threejs-shader',
     engine: 'threejs',
     tags: ['shader','plasma','glsl','fragment','colorful'],
     desc: 'Full-screen GLSL plasma shader with animated colour blobs driven by sine/cosine functions.',
@@ -2251,8 +2251,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-wave-color',
-    name: 'Aurora Wave',
-    cat: 'threejs-shader',
+    title: 'Aurora Wave',
+    category: 'threejs-shader',
     engine: 'threejs',
     tags: ['shader','aurora','wave','gradient','glsl'],
     desc: 'Animated aurora-borealis gradient wave using a GLSL fragment shader.',
@@ -2307,8 +2307,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-hologram',
-    name: 'Hologram Grid',
-    cat: 'threejs-shader',
+    title: 'Hologram Grid',
+    category: 'threejs-shader',
     engine: 'threejs',
     tags: ['shader','hologram','grid','scanlines','sci-fi','cyan'],
     desc: 'Sci-fi hologram with animated grid lines, scrolling scanlines, and edge vignette.',
@@ -2366,8 +2366,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-glitch',
-    name: 'Glitch Shader',
-    cat: 'threejs-shader',
+    title: 'Glitch Shader',
+    category: 'threejs-shader',
     engine: 'threejs',
     tags: ['shader','glitch','rgb-split','vhs','distortion'],
     desc: 'VHS glitch shader — random horizontal tears with RGB chromatic-aberration split.',
@@ -2433,8 +2433,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-image-distort',
-    name: 'Image Ripple Distortion',
-    cat: 'threejs-shader',
+    title: 'Image Ripple Distortion',
+    category: 'threejs-shader',
     engine: 'threejs',
     tags: ['shader','ripple','distortion','image','uv','water'],
     desc: 'Water-ripple UV distortion applied to a canvas texture via the fragment shader.',
@@ -2493,8 +2493,8 @@ const mat = new THREE.ShaderMaterial({
   // ─── Three.js: Text ──────────────────────────────────────────────────
   {
     id: 'thjs-text-wave',
-    name: '3D Text Wave',
-    cat: 'threejs-text',
+    title: '3D Text Wave',
+    category: 'threejs-text',
     engine: 'threejs',
     tags: ['text','3d','wave','canvas','texture','vertex'],
     desc: 'Canvas-texture text on a subdivided PlaneGeometry — vertices wave via vertex shader.',
@@ -2558,8 +2558,8 @@ scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,1,40,20), mat));`,
   },
   {
     id: 'thjs-text-neon',
-    name: 'Neon Glow Text',
-    cat: 'threejs-text',
+    title: 'Neon Glow Text',
+    category: 'threejs-text',
     engine: 'threejs',
     tags: ['text','neon','glow','shader','canvas','bloom','additive'],
     desc: 'Multi-layer canvas text with animated neon pulse using AdditiveBlending ShaderMaterial.',
@@ -2624,8 +2624,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-text-reveal',
-    name: 'Text Curtain Reveal',
-    cat: 'threejs-text',
+    title: 'Text Curtain Reveal',
+    category: 'threejs-text',
     engine: 'threejs',
     tags: ['text','reveal','curtain','shader','wipe','mask'],
     desc: 'Shader-based curtain wipe reveals text left-to-right with a glowing rough edge.',
@@ -2698,8 +2698,8 @@ const mat = new THREE.ShaderMaterial({
   // ─── Three.js: Transitions ───────────────────────────────────────────
   {
     id: 'thjs-trans-wave',
-    name: '3D Wave Wipe',
-    cat: 'threejs-transition',
+    title: '3D Wave Wipe',
+    category: 'threejs-transition',
     engine: 'threejs',
     tags: ['transition','wave','wipe','shader','3d'],
     desc: 'Page transition: scene A wiped away by a travelling sine wave with a glowing edge.',
@@ -2765,8 +2765,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-trans-dissolve',
-    name: 'Noise Dissolve',
-    cat: 'threejs-transition',
+    title: 'Noise Dissolve',
+    category: 'threejs-transition',
     engine: 'threejs',
     tags: ['transition','dissolve','noise','shader','discard'],
     desc: 'Noise-based dissolve transition fragments pixels into chaos before revealing the new scene.',
@@ -2833,8 +2833,8 @@ const mat = new THREE.ShaderMaterial({
   },
   {
     id: 'thjs-trans-pixel',
-    name: 'Pixel Block Transition',
-    cat: 'threejs-transition',
+    title: 'Pixel Block Transition',
+    category: 'threejs-transition',
     engine: 'threejs',
     tags: ['transition','pixel','blocks','shader','retro','grid'],
     desc: 'Retro pixel-block wipe: tiles stagger from scene A to scene B in a diagonal wave.',
@@ -2903,8 +2903,8 @@ const mat = new THREE.ShaderMaterial({
   // ─── Three.js: UI ────────────────────────────────────────────────────
   {
     id: 'thjs-ui-glow-btn',
-    name: 'Glow Orb Button',
-    cat: 'threejs-ui',
+    title: 'Glow Orb Button',
+    category: 'threejs-ui',
     engine: 'threejs',
     tags: ['ui','button','glow','orb','shader','interactive','hover'],
     desc: 'Interactive 3D button with animated glow orb that intensifies on hover.',
@@ -2973,8 +2973,8 @@ el.addEventListener('mouseleave',()=>mat.uniforms.hover.value=0);`,
   },
   {
     id: 'thjs-ui-ripple',
-    name: 'Ripple Click Effect',
-    cat: 'threejs-ui',
+    title: 'Ripple Click Effect',
+    category: 'threejs-ui',
     engine: 'threejs',
     tags: ['ui','ripple','click','shader','interactive','button'],
     desc: 'Click anywhere to spawn an expanding ring ripple that fades out — pure shader, no DOM.',
@@ -3055,8 +3055,8 @@ el.addEventListener('click', e => {
   },
   {
     id: 'thjs-ui-particles',
-    name: 'Floating Particles',
-    cat: 'threejs-ui',
+    title: 'Floating Particles',
+    category: 'threejs-ui',
     engine: 'threejs',
     tags: ['ui','particles','points','float','ambient','background','shader'],
     desc: 'Ambient floating particle system using THREE.Points with a glowing dot vertex+fragment shader.',
