@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dennis's GSAP LLM Animation Library</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="header-inner">
+        <div>
+          <h1>Dennis's GSAP LLM Animation Library <span class="version-badge">V1.1</span></h1>
+          <p class="subtitle">40 animations &middot; hover preview to pause &middot; click Copy to grab code</p>
+        </div>
+        <input type="text" class="search" id="search" placeholder="&#128269; Search animations&hellip;" />
+      </div>
+    </header>
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="core">Core</button>
+      <button class="filter-btn" data-filter="easing">Easing</button>
+      <button class="filter-btn" data-filter="stagger">Stagger</button>
+      <button class="filter-btn" data-filter="timeline">Timeline</button>
+      <button class="filter-btn" data-filter="text">Text</button>
+      <button class="filter-btn" data-filter="svg">SVG</button>
+      <button class="filter-btn" data-filter="layout">Layout</button>
+      <button class="filter-btn" data-filter="misc">Misc</button>
+      <button class="filter-btn" data-filter="transitions">Transitions</button>
+      <button class="filter-btn" data-filter="scroll">Scroll</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <div class="empty-state" id="empty">No animations match your search.</div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    Code copied!
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
