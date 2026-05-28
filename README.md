@@ -1,6 +1,6 @@
 # Dennis's LLM Animation Library · V1.1
 
-A personal reference library of **100 animations** (86 GSAP + 14 Three.js) — each with a live preview, one-click code copy, and an AI-ready prompt copy. Built to quickly find, preview, and reuse animations across future projects.
+A personal reference library of **106 animations** (86 GSAP + 20 Three.js) — each with a live preview, one-click code copy, and an AI-ready prompt copy. Built to quickly find, preview, and reuse animations across future projects.
 
 ![Preview](assets/preview-full.png)
 
@@ -8,7 +8,7 @@ A personal reference library of **100 animations** (86 GSAP + 14 Three.js) — e
 
 ## Features
 
-- **100 animations** across 14 categories (GSAP + Three.js)
+- **106 animations** across 14 categories (GSAP + Three.js)
 - **Live previews** — every card animates in real time; hover to pause
 - **Copy Code** — grab production-ready code instantly
 - **Copy Prompt** — copy an AI prompt for that animation to use with ChatGPT, Claude, etc.
@@ -35,14 +35,14 @@ A personal reference library of **100 animations** (86 GSAP + 14 Three.js) — e
 | **Transitions** | 12 | Cross-fade, slide, wipe, curtain, circle reveal, 3D flip, blocks |
 | **Scroll** | 12 | ScrollTrigger fade, scrub, parallax, pin, horizontal, counter |
 
-### Three.js (14 animations)
+### Three.js (20 animations)
 
 | Category | Count | Description |
 |---|---|---|
-| **Shaders** | 5 | Plasma, aurora wave, hologram grid, VHS glitch, image ripple |
-| **3D Text** | 3 | Vertex-waving text, neon glow, curtain reveal |
-| **3D Transitions** | 3 | Wave wipe, noise dissolve, pixel block stagger |
-| **3D UI** | 3 | Glow orb button, click ripple, floating particles |
+| **Shaders** | 5 | FBM plasma, aurora borealis, hologram grid, SDF raymarching, hypnotic tunnel |
+| **3D Text** | 4 | Vertex wave, cyberpunk neon, curtain reveal, RGB glitch |
+| **3D Transitions** | 4 | Wave wipe, noise dissolve, vortex swirl, pixel block stagger |
+| **3D UI** | 7 | Glow orb, ripple burst, wireframe icosahedron, DNA helix, spiral galaxy, fire sparks, particle nebula |
 
 ---
 
