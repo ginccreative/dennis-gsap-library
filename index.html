@@ -11,8 +11,9 @@
     <header>
       <div class="header-inner">
         <div>
-          <h1>Dennis's GSAP LLM Animation Library <span class="version-badge">V1.1</span></h1>
-          <p class="subtitle">40 animations &middot; hover preview to pause &middot; click Copy to grab code</p>
+          <h1>Dennis's LLM Animation Library <span class="version-badge">V1.1</span></h1>
+          <p class="tagline">A personal reference library for <strong>GSAP</strong> &amp; <strong>Three.js</strong> animations — browse, preview, and copy code or an AI prompt for any effect.</p>
+          <p class="subtitle" id="anim-count"></p>
         </div>
         <input type="text" class="search" id="search" placeholder="&#128269; Search animations&hellip;" />
       </div>
@@ -20,6 +21,7 @@
 
     <div class="filters" id="filters">
       <button class="filter-btn active" data-filter="all">All</button>
+      <span class="filter-group-label">GSAP</span>
       <button class="filter-btn" data-filter="core">Core</button>
       <button class="filter-btn" data-filter="easing">Easing</button>
       <button class="filter-btn" data-filter="stagger">Stagger</button>
@@ -30,6 +32,11 @@
       <button class="filter-btn" data-filter="misc">Misc</button>
       <button class="filter-btn" data-filter="transitions">Transitions</button>
       <button class="filter-btn" data-filter="scroll">Scroll</button>
+      <span class="filter-group-label">Three.js</span>
+      <button class="filter-btn" data-filter="threejs-shader">Shaders</button>
+      <button class="filter-btn" data-filter="threejs-text">3D Text</button>
+      <button class="filter-btn" data-filter="threejs-transition">3D Transitions</button>
+      <button class="filter-btn" data-filter="threejs-ui">3D UI</button>
     </div>
 
     <div class="grid" id="grid"></div>

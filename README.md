@@ -1,6 +1,6 @@
-# Dennis's GSAP LLM Animation Library · V1.1
+# Dennis's LLM Animation Library · V1.1
 
-A personal reference library of **86 GSAP animations** — each with a live preview, one-click code copy, and an AI-ready prompt copy. Built to quickly find, preview, and reuse animations across future projects.
+A personal reference library of **100 animations** (86 GSAP + 14 Three.js) — each with a live preview, one-click code copy, and an AI-ready prompt copy. Built to quickly find, preview, and reuse animations across future projects.
 
 ![Preview](assets/preview-full.png)
 
@@ -8,19 +8,21 @@ A personal reference library of **86 GSAP animations** — each with a live prev
 
 ## Features
 
-- **86 animations** across 10 categories
+- **100 animations** across 14 categories (GSAP + Three.js)
 - **Live previews** — every card animates in real time; hover to pause
-- **Copy Code** — grab production-ready GSAP code instantly
+- **Copy Code** — grab production-ready code instantly
 - **Copy Prompt** — copy an AI prompt for that animation to use with ChatGPT, Claude, etc.
-- **Filter by category** — Core, Easing, Stagger, Timeline, Text, SVG, Layout, Misc, Transitions, Scroll
+- **Filter by category** — GSAP: Core, Easing, Stagger, Timeline, Text, SVG, Layout, Misc, Transitions, Scroll · Three.js: Shaders, 3D Text, 3D Transitions, 3D UI
 - **Search** — find any animation by name, tag, or description
-- Dark theme · responsive 3-column grid
+- Dark theme · responsive 3-column grid · separate GSAP and Three.js sections
 
 ---
 
 ## Categories
 
-| Category | Animations | Description |
+### GSAP (86 animations)
+
+| Category | Count | Description |
 |---|---|---|
 | **Core** | 10 | Fade, slide, scale, rotate, clip — the fundamentals |
 | **Easing** | 6 | Elastic, bounce, custom curves, wiggle |
@@ -32,6 +34,15 @@ A personal reference library of **86 GSAP animations** — each with a live prev
 | **Misc** | 6 | Magnetic, ripple, elastic trail, glow pulse |
 | **Transitions** | 12 | Cross-fade, slide, wipe, curtain, circle reveal, 3D flip, blocks |
 | **Scroll** | 12 | ScrollTrigger fade, scrub, parallax, pin, horizontal, counter |
+
+### Three.js (14 animations)
+
+| Category | Count | Description |
+|---|---|---|
+| **Shaders** | 5 | Plasma, aurora wave, hologram grid, VHS glitch, image ripple |
+| **3D Text** | 3 | Vertex-waving text, neon glow, curtain reveal |
+| **3D Transitions** | 3 | Wave wipe, noise dissolve, pixel block stagger |
+| **3D UI** | 3 | Glow orb button, click ripple, floating particles |
 
 ---
 
@@ -77,6 +88,7 @@ Paste it into Claude, ChatGPT, or any AI assistant to get a customised version f
 | Tool | Version |
 |---|---|
 | [GSAP](https://gsap.com) | 3.12.5 |
+| [Three.js](https://threejs.org) | 0.184 |
 | [Vite](https://vite.dev) | 5.4 |
 | Vanilla JS / ES Modules | — |
 

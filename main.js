@@ -11,6 +11,7 @@ import { CustomEase }        from 'gsap/CustomEase';
 import { EasePack }          from 'gsap/EasePack';
 import { TextPlugin }        from 'gsap/TextPlugin';
 import { ScrollTrigger }     from 'gsap/ScrollTrigger';
+import * as THREE            from 'three';
 
 gsap.registerPlugin(
   Flip, Draggable, InertiaPlugin, MotionPathPlugin,
@@ -2196,6 +2197,956 @@ gsap.to(panels, {
     }
   },
 
+  // ─── Three.js: Shader ────────────────────────────────────────────────
+  {
+    id: 'thjs-plasma',
+    name: 'Plasma Shader',
+    cat: 'threejs-shader',
+    engine: 'threejs',
+    tags: ['shader','plasma','glsl','fragment','colorful'],
+    desc: 'Full-screen GLSL plasma shader with animated colour blobs driven by sine/cosine functions.',
+    code: `import * as THREE from 'three';
+const mat = new THREE.ShaderMaterial({
+  uniforms: { time:{value:0}, res:{value:new THREE.Vector2(W,H)} },
+  vertexShader: 'void main(){gl_Position=vec4(position,1.0);}',
+  fragmentShader: \`
+    uniform float time; uniform vec2 res;
+    void main(){
+      vec2 p=gl_FragCoord.xy/res-.5;
+      float v=sin(p.x*8.+time)*cos(p.y*6.+time*.7)
+             +sin(length(p)*12.-time*1.2);
+      gl_FragColor=vec4(.5+.5*sin(v+time),
+        .5+.5*sin(v+time+2.094),
+        .5+.5*sin(v+time+4.189),1.);
+    }\`,
+});
+// loop: mat.uniforms.time.value = clock.getElapsedTime();`,
+    prompt: `Create a Three.js full-screen plasma shader. Use ShaderMaterial with OrthographicCamera(-1,1,1,-1,0,1) and PlaneGeometry(2,2). Fragment shader produces animated plasma colour blobs using sine/cosine on normalised coords plus a time uniform.`,
+    html: '',
+    animate(c) {
+      const W = c.offsetWidth || 240, H = c.offsetHeight || 160;
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(W, H);
+      Object.assign(renderer.domElement.style, { width:'100%', height:'100%', display:'block' });
+      c.appendChild(renderer.domElement);
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const mat = new THREE.ShaderMaterial({
+        uniforms: { time:{value:0}, res:{value:new THREE.Vector2(W,H)} },
+        vertexShader: `void main(){gl_Position=vec4(position,1.0);}`,
+        fragmentShader: `
+          uniform float time; uniform vec2 res;
+          void main(){
+            vec2 p=gl_FragCoord.xy/res-.5;
+            float v=sin(p.x*8.+time)*cos(p.y*6.+time*.7)+sin(length(p)*12.-time*1.2);
+            gl_FragColor=vec4(.5+.5*sin(v+time),.5+.5*sin(v+time+2.094),.5+.5*sin(v+time+4.189),1.);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), mat));
+      const clock = new THREE.Clock(); let raf;
+      const tick = () => { raf=requestAnimationFrame(tick); mat.uniforms.time.value=clock.getElapsedTime(); renderer.render(scene,camera); };
+      clock.start(); tick();
+      return { pause(){ cancelAnimationFrame(raf); clock.stop(); }, resume(){ clock.start(); tick(); } };
+    }
+  },
+  {
+    id: 'thjs-wave-color',
+    name: 'Aurora Wave',
+    cat: 'threejs-shader',
+    engine: 'threejs',
+    tags: ['shader','aurora','wave','gradient','glsl'],
+    desc: 'Animated aurora-borealis gradient wave using a GLSL fragment shader.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms: { time:{value:0}, res:{value:new THREE.Vector2(W,H)} },
+  vertexShader: 'void main(){gl_Position=vec4(position,1.);}',
+  fragmentShader: \`
+    uniform float time; uniform vec2 res;
+    void main(){
+      vec2 uv=gl_FragCoord.xy/res;
+      float w1=sin(uv.x*6.28+time*1.5+sin(uv.x*3.+time)*.5)*.5+.5;
+      float w2=sin(uv.x*4.+time*1.1+cos(uv.y*5.+time*.8)*.4)*.5+.5;
+      vec3 c1=mix(vec3(.05,.2,.8),vec3(.7,.05,.9),w1);
+      vec3 c2=mix(vec3(.05,.8,.5),vec3(.9,.4,.1),w2);
+      vec3 col=mix(c1,c2,uv.y*.7+.15);
+      col+=vec3(.8,.9,1.)*pow(w1*w2,.8)*.3;
+      gl_FragColor=vec4(col,1.);
+    }\`,
+});`,
+    prompt: `Create a Three.js aurora wave shader on a full-screen quad. Fragment shader blends two sine-wave colour bands (blues/purples/greens) driven by a time uniform, mixed across UV.y with a bright highlight where the waves intersect.`,
+    html: '',
+    animate(c) {
+      const W = c.offsetWidth||240, H = c.offsetHeight||160;
+      const renderer = new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const mat = new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},res:{value:new THREE.Vector2(W,H)}},
+        vertexShader:`void main(){gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time; uniform vec2 res;
+          void main(){
+            vec2 uv=gl_FragCoord.xy/res;
+            float w1=sin(uv.x*6.28+time*1.5+sin(uv.x*3.+time)*.5)*.5+.5;
+            float w2=sin(uv.x*4.+time*1.1+cos(uv.y*5.+time*.8)*.4)*.5+.5;
+            vec3 c1=mix(vec3(.05,.2,.8),vec3(.7,.05,.9),w1);
+            vec3 c2=mix(vec3(.05,.8,.5),vec3(.9,.4,.1),w2);
+            vec3 col=mix(c1,c2,uv.y*.7+.15);
+            col+=vec3(.8,.9,1.)*pow(w1*w2,.8)*.3;
+            gl_FragColor=vec4(col,1.);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock(); let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start(); tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-hologram',
+    name: 'Hologram Grid',
+    cat: 'threejs-shader',
+    engine: 'threejs',
+    tags: ['shader','hologram','grid','scanlines','sci-fi','cyan'],
+    desc: 'Sci-fi hologram with animated grid lines, scrolling scanlines, and edge vignette.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms: { time:{value:0}, res:{value:new THREE.Vector2(W,H)} },
+  transparent: true,
+  fragmentShader: \`
+    uniform float time; uniform vec2 res;
+    void main(){
+      vec2 uv=gl_FragCoord.xy/res;
+      float gx=step(.95,fract(uv.x*22.));
+      float gy=step(.95,fract(uv.y*16.));
+      float scan=step(.96,fract(uv.y*100.+time*1.5))*.4;
+      float edge=smoothstep(.3,.5,max(abs(uv.x-.5),abs(uv.y-.5)));
+      float a=(gx*.6+gy*.6+scan)*(1.-edge*.8);
+      vec3 col=vec3(.1,.85,.8)*(gx*.8+.2)+vec3(.8,.2,1.)*scan*.5;
+      gl_FragColor=vec4(col,a);
+    }\`,
+});`,
+    prompt: `Create a Three.js sci-fi hologram shader. Fragment shader draws cyan grid lines (step on fract(uv*density)), scrolling scanlines (fract(uv.y*100+time)), edge vignette (smoothstep on max(abs(uv.x-0.5),abs(uv.y-0.5))), all transparent over a dark background.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x050510,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},res:{value:new THREE.Vector2(W,H)}},
+        transparent:true,
+        vertexShader:`void main(){gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time; uniform vec2 res;
+          void main(){
+            vec2 uv=gl_FragCoord.xy/res;
+            float gx=step(.95,fract(uv.x*22.));
+            float gy=step(.95,fract(uv.y*16.));
+            float scan=step(.96,fract(uv.y*100.+time*1.5))*.4;
+            float flicker=.9+.1*sin(time*60.);
+            float edge=smoothstep(.3,.5,max(abs(uv.x-.5),abs(uv.y-.5)));
+            float a=(gx*.6+gy*.6+scan)*(1.-edge*.8)*flicker;
+            vec3 col=vec3(.1,.85,.8)*(gx*.8+.2)+vec3(.8,.2,1.)*scan*.5;
+            gl_FragColor=vec4(col,a);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-glitch',
+    name: 'Glitch Shader',
+    cat: 'threejs-shader',
+    engine: 'threejs',
+    tags: ['shader','glitch','rgb-split','vhs','distortion'],
+    desc: 'VHS glitch shader — random horizontal tears with RGB chromatic-aberration split.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms: { time:{value:0}, tex:{value:texture}, res:{value:new THREE.Vector2(W,H)} },
+  fragmentShader: \`
+    uniform float time; uniform sampler2D tex; uniform vec2 res;
+    float rand(float n){return fract(sin(n)*43758.5);}
+    void main(){
+      vec2 uv=gl_FragCoord.xy/res;
+      float row=floor(uv.y*40.);
+      float g=step(.88,rand(row+floor(time*10.)));
+      float shift=g*(rand(row+time)-.5)*.08;
+      float cr=g*rand(time+1.)*.006;
+      vec4 r=texture2D(tex,vec2(uv.x+shift+cr,uv.y));
+      vec4 gr=texture2D(tex,vec2(uv.x+shift,uv.y));
+      vec4 b=texture2D(tex,vec2(uv.x+shift-cr,uv.y));
+      gl_FragColor=vec4(r.r,gr.g,b.b,1.);
+    }\`,
+});`,
+    prompt: `Create a Three.js VHS glitch shader. Draw text onto a CanvasTexture as the source. Fragment shader: rand() keyed on scanline row + floor(time*speed) triggers random horizontal shifts and RGB chromatic aberration on affected rows. Each colour channel samples at a slightly different X offset.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const tc=document.createElement('canvas');tc.width=W;tc.height=H;
+      const tx=tc.getContext('2d');
+      const grad=tx.createLinearGradient(0,0,W,H);
+      grad.addColorStop(0,'#1a0533');grad.addColorStop(.5,'#0d2b45');grad.addColorStop(1,'#0a1628');
+      tx.fillStyle=grad;tx.fillRect(0,0,W,H);
+      tx.font=`bold ${Math.floor(H*.35)}px monospace`;tx.textAlign='center';tx.textBaseline='middle';
+      tx.fillStyle='rgba(255,255,255,0.9)';tx.fillText('GLITCH',W/2,H/2);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},tex:{value:new THREE.CanvasTexture(tc)},res:{value:new THREE.Vector2(W,H)}},
+        vertexShader:`void main(){gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time;uniform sampler2D tex;uniform vec2 res;
+          float rand(float n){return fract(sin(n)*43758.5);}
+          void main(){
+            vec2 uv=gl_FragCoord.xy/res;
+            float row=floor(uv.y*40.);
+            float g=step(.88,rand(row+floor(time*10.)));
+            float shift=g*(rand(row+time)-.5)*.08;
+            float cr=g*rand(time+1.)*.006;
+            vec4 r=texture2D(tex,vec2(uv.x+shift+cr,uv.y));
+            vec4 gr=texture2D(tex,vec2(uv.x+shift,uv.y));
+            vec4 b=texture2D(tex,vec2(uv.x+shift-cr,uv.y));
+            vec3 col=vec3(r.r,gr.g,b.b);col+=g*vec3(.15,-.04,-.04);
+            gl_FragColor=vec4(col,1.);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-image-distort',
+    name: 'Image Ripple Distortion',
+    cat: 'threejs-shader',
+    engine: 'threejs',
+    tags: ['shader','ripple','distortion','image','uv','water'],
+    desc: 'Water-ripple UV distortion applied to a canvas texture via the fragment shader.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms: { time:{value:0}, map:{value:texture} },
+  vertexShader: \`varying vec2 vUv;
+    void main(){vUv=uv;gl_Position=vec4(position,1.);}\`,
+  fragmentShader: \`
+    uniform float time; uniform sampler2D map;
+    varying vec2 vUv;
+    void main(){
+      vec2 uv=vUv;
+      uv.x+=sin(uv.y*25.+time*2.)*.012;
+      uv.y+=cos(uv.x*25.+time*2.)*.012;
+      gl_FragColor=texture2D(map,uv);
+    }\`,
+});`,
+    prompt: `Create a Three.js image ripple distortion. Apply a CanvasTexture to a full-screen PlaneGeometry. Fragment shader offsets UV.x with sin(UV.y*freq+time*speed)*amount and UV.y with cos(UV.x*freq+time*speed)*amount to create a water ripple effect on the image.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const tc=document.createElement('canvas');tc.width=W;tc.height=H;
+      const tx=tc.getContext('2d');
+      const g=tx.createRadialGradient(W*.3,H*.4,5,W*.5,H*.5,W*.6);
+      g.addColorStop(0,'#ff6b9d');g.addColorStop(.5,'#c026d3');g.addColorStop(1,'#0d1117');
+      tx.fillStyle=g;tx.fillRect(0,0,W,H);
+      tx.font=`bold ${Math.floor(H*.28)}px sans-serif`;tx.textAlign='center';tx.textBaseline='middle';
+      tx.shadowBlur=10;tx.shadowColor='#fff';
+      tx.fillStyle='rgba(255,255,255,0.9)';tx.fillText('RIPPLE',W/2,H/2);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},map:{value:new THREE.CanvasTexture(tc)}},
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time;uniform sampler2D map;varying vec2 vUv;
+          void main(){
+            vec2 uv=vUv;
+            uv.x+=sin(uv.y*25.+time*2.)*.012;
+            uv.y+=cos(uv.x*25.+time*2.)*.012;
+            gl_FragColor=texture2D(map,uv);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+
+  // ─── Three.js: Text ──────────────────────────────────────────────────
+  {
+    id: 'thjs-text-wave',
+    name: '3D Text Wave',
+    cat: 'threejs-text',
+    engine: 'threejs',
+    tags: ['text','3d','wave','canvas','texture','vertex'],
+    desc: 'Canvas-texture text on a subdivided PlaneGeometry — vertices wave via vertex shader.',
+    code: `const tc=document.createElement('canvas'); tc.width=512; tc.height=256;
+const tx=tc.getContext('2d');
+tx.fillStyle='#0d0d1a'; tx.fillRect(0,0,512,256);
+tx.font='bold 96px sans-serif'; tx.textAlign='center'; tx.textBaseline='middle';
+tx.fillStyle='#a78bfa'; tx.fillText('WAVE', 256, 128);
+const mat = new THREE.ShaderMaterial({
+  uniforms:{ time:{value:0}, map:{value:new THREE.CanvasTexture(tc)} },
+  vertexShader:\`
+    uniform float time; varying vec2 vUv;
+    void main(){
+      vUv=uv; vec3 p=position;
+      p.z+=sin(p.x*5.+time*2.)*.1+sin(p.y*4.+time*1.3)*.07;
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+    }\`,
+  fragmentShader:\`
+    uniform sampler2D map; varying vec2 vUv;
+    void main(){ gl_FragColor=texture2D(map,vUv); }\`,
+});
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,1,40,20), mat));`,
+    prompt: `Create a Three.js 3D text wave. Draw text onto a canvas, use as CanvasTexture on PlaneGeometry(2,1,40,20). Vertex shader displaces Z: p.z += sin(p.x*5+time*2)*0.1 + sin(p.y*4+time*1.3)*0.07. Use PerspectiveCamera.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x0d0d1a,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.PerspectiveCamera(45,W/H,.1,10);
+      camera.position.z=2;
+      const tc=document.createElement('canvas');tc.width=512;tc.height=256;
+      const tx=tc.getContext('2d');
+      tx.fillStyle='#0d0d1a';tx.fillRect(0,0,512,256);
+      tx.font='bold 96px sans-serif';tx.textAlign='center';tx.textBaseline='middle';
+      tx.fillStyle='rgba(124,58,237,0.4)';tx.fillText('WAVE',258,130);
+      tx.fillStyle='#a78bfa';tx.fillText('WAVE',256,128);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},map:{value:new THREE.CanvasTexture(tc)}},
+        transparent:true,
+        vertexShader:`
+          uniform float time;varying vec2 vUv;
+          void main(){
+            vUv=uv;vec3 p=position;
+            p.z+=sin(p.x*5.+time*2.)*.1+sin(p.y*4.+time*1.3)*.07;
+            gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+          }`,
+        fragmentShader:`
+          uniform sampler2D map;varying vec2 vUv;
+          void main(){gl_FragColor=texture2D(map,vUv);}`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,1,40,20),mat));
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-text-neon',
+    name: 'Neon Glow Text',
+    cat: 'threejs-text',
+    engine: 'threejs',
+    tags: ['text','neon','glow','shader','canvas','bloom','additive'],
+    desc: 'Multi-layer canvas text with animated neon pulse using AdditiveBlending ShaderMaterial.',
+    code: `const tc=document.createElement('canvas'); tc.width=W; tc.height=H;
+const tx=tc.getContext('2d');
+tx.fillStyle='#050510'; tx.fillRect(0,0,W,H);
+tx.font='bold 64px monospace'; tx.textAlign='center'; tx.textBaseline='middle';
+[30,20,12,5,0].forEach((blur,i)=>{
+  tx.shadowBlur=blur; tx.shadowColor='#00ffff';
+  tx.fillStyle=\`rgba(0,255,255,\${.1+i*.15})\`;
+  tx.fillText('NEON',W/2,H/2);
+});
+const mat = new THREE.ShaderMaterial({
+  uniforms:{ time:{value:0}, map:{value:new THREE.CanvasTexture(tc)} },
+  transparent:true, blending:THREE.AdditiveBlending, depthWrite:false,
+  fragmentShader:\`
+    uniform float time; uniform sampler2D map; varying vec2 vUv;
+    void main(){
+      vec4 t=texture2D(map,vUv);
+      float pulse=.75+.25*sin(time*2.5);
+      gl_FragColor=vec4(t.rgb*pulse,t.a*pulse);
+    }\`,
+});`,
+    prompt: `Create Three.js neon glow text. Draw layered text with decreasing shadowBlur passes onto a canvas. Apply with ShaderMaterial (AdditiveBlending, transparent, depthWrite:false). Fragment shader: pulse = 0.75+0.25*sin(time*2.5), multiply rgb and alpha by pulse.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x050510,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const tc=document.createElement('canvas');tc.width=W;tc.height=H;
+      const tx=tc.getContext('2d');
+      tx.fillStyle='#050510';tx.fillRect(0,0,W,H);
+      const fs=Math.floor(H*.35);
+      tx.font=`bold ${fs}px monospace`;tx.textAlign='center';tx.textBaseline='middle';
+      const blurs=[30,20,12,5,0];
+      const alphas=[.08,.15,.3,.6,.9];
+      for(let i=0;i<5;i++){tx.shadowBlur=blurs[i];tx.shadowColor='#00ffff';tx.fillStyle=`rgba(0,255,255,${alphas[i]})`;tx.fillText('NEON',W/2,H/2);}
+      tx.shadowBlur=0;
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},map:{value:new THREE.CanvasTexture(tc)}},
+        transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time;uniform sampler2D map;varying vec2 vUv;
+          void main(){
+            vec4 t=texture2D(map,vUv);
+            float pulse=.75+.25*sin(time*2.5);
+            gl_FragColor=vec4(t.rgb*pulse,t.a*pulse);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-text-reveal',
+    name: 'Text Curtain Reveal',
+    cat: 'threejs-text',
+    engine: 'threejs',
+    tags: ['text','reveal','curtain','shader','wipe','mask'],
+    desc: 'Shader-based curtain wipe reveals text left-to-right with a glowing rough edge.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms:{ progress:{value:0}, map:{value:textTexture} },
+  transparent:true,
+  fragmentShader:\`
+    uniform float progress; uniform sampler2D map;
+    varying vec2 vUv;
+    float rand(float n){return fract(sin(n)*43758.5);}
+    void main(){
+      float noise=rand(floor(vUv.x*30.)+floor(vUv.y*20.)*.1);
+      float threshold=vUv.x+noise*.18;
+      if(threshold>progress) discard;
+      vec4 t=texture2D(map,vUv);
+      float edge=1.-smoothstep(progress-.12,progress,threshold);
+      gl_FragColor=vec4(t.rgb+vec3(.3,.1,.6)*edge*.8,t.a);
+    }\`,
+});
+// Animate: progress oscillates 0 → 1.2 → 0`,
+    prompt: `Create a Three.js text curtain reveal. Canvas text as CanvasTexture. Fragment shader: noise = rand(floor(uv.x*30)+floor(uv.y*20)*0.1), threshold = uv.x+noise*0.18. Discard if threshold > progress. Add glowing edge where threshold ≈ progress with smoothstep. Animate progress 0→1.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x0d0d1a,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const tc=document.createElement('canvas');tc.width=W;tc.height=H;
+      const tx=tc.getContext('2d');
+      tx.fillStyle='#0d0d1a';tx.fillRect(0,0,W,H);
+      tx.font=`bold ${Math.floor(H*.32)}px sans-serif`;tx.textAlign='center';tx.textBaseline='middle';
+      tx.fillStyle='rgba(124,58,237,0.4)';tx.fillText('REVEAL',W/2+2,H/2+2);
+      tx.fillStyle='#a78bfa';tx.fillText('REVEAL',W/2,H/2);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{progress:{value:0},map:{value:new THREE.CanvasTexture(tc)}},
+        transparent:true,
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float progress;uniform sampler2D map;varying vec2 vUv;
+          float rand(float n){return fract(sin(n)*43758.5);}
+          void main(){
+            float noise=rand(floor(vUv.x*30.)+floor(vUv.y*20.)*.1);
+            float threshold=vUv.x+noise*.18;
+            if(threshold>progress)discard;
+            vec4 t=texture2D(map,vUv);
+            float edge=1.-smoothstep(progress-.12,progress,threshold);
+            gl_FragColor=vec4(t.rgb+vec3(.3,.1,.6)*edge*.8,t.a);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      let prog=0,dir=1;
+      const tick=()=>{
+        raf=requestAnimationFrame(tick);
+        const dt=clock.getDelta();
+        prog+=dir*dt*.7;
+        if(prog>=1.2){prog=1.2;dir=-1;}else if(prog<=-0.1){prog=-0.1;dir=1;}
+        mat.uniforms.progress.value=prog;
+        renderer.render(scene,camera);
+      };
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+
+  // ─── Three.js: Transitions ───────────────────────────────────────────
+  {
+    id: 'thjs-trans-wave',
+    name: '3D Wave Wipe',
+    cat: 'threejs-transition',
+    engine: 'threejs',
+    tags: ['transition','wave','wipe','shader','3d'],
+    desc: 'Page transition: scene A wiped away by a travelling sine wave with a glowing edge.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms:{
+    progress:{value:0},
+    colA:{value:new THREE.Color(0x7c3aed)},
+    colB:{value:new THREE.Color(0x06b6d4)}
+  },
+  fragmentShader:\`
+    uniform float progress; uniform vec3 colA,colB;
+    varying vec2 vUv;
+    void main(){
+      float wave=vUv.x+sin(vUv.y*10.+progress*6.)*.1;
+      float mask=smoothstep(progress-.06,progress+.06,wave);
+      vec3 col=mix(colA,colB,mask);
+      float edge=smoothstep(progress-.02,progress+.02,wave)
+               *smoothstep(progress+.06,progress+.02,wave);
+      col+=vec3(.8,.5,1.)*edge*.6;
+      gl_FragColor=vec4(col,1.);
+    }\`,
+});
+// Animate: progress 0 → 1`,
+    prompt: `Create a Three.js wave wipe transition. Fragment shader: wave = UV.x + sin(UV.y*10+progress*6)*0.1. smoothstep on wave vs progress blends colA/colB. Add a glowing edge at the wave front using two overlapping smoothsteps. Animate progress 0→1.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{progress:{value:0},colA:{value:new THREE.Color(0x7c3aed)},colB:{value:new THREE.Color(0x06b6d4)}},
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float progress;uniform vec3 colA,colB;varying vec2 vUv;
+          void main(){
+            float wave=vUv.x+sin(vUv.y*10.+progress*6.)*.1;
+            float mask=smoothstep(progress-.06,progress+.06,wave);
+            vec3 bg=mix(vec3(.05,.03,.12),vec3(.02,.08,.12),vUv.y);
+            vec3 col=mix(colA*(.5+.5*vUv.y),bg,mask);
+            float edge=smoothstep(progress-.02,progress+.02,wave)*smoothstep(progress+.06,progress+.02,wave);
+            col+=vec3(.8,.5,1.)*edge*.6;
+            gl_FragColor=vec4(col,1.);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      let prog=0,dir=1;
+      const tick=()=>{
+        raf=requestAnimationFrame(tick);
+        const dt=clock.getDelta();
+        prog+=dir*dt*.6;
+        if(prog>=1.1){prog=1.1;dir=-1;}else if(prog<=-0.1){prog=-0.1;dir=1;}
+        mat.uniforms.progress.value=prog;
+        renderer.render(scene,camera);
+      };
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-trans-dissolve',
+    name: 'Noise Dissolve',
+    cat: 'threejs-transition',
+    engine: 'threejs',
+    tags: ['transition','dissolve','noise','shader','discard'],
+    desc: 'Noise-based dissolve transition fragments pixels into chaos before revealing the new scene.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms:{ progress:{value:0}, mapA:{value:texA}, mapB:{value:texB} },
+  fragmentShader:\`
+    uniform float progress; uniform sampler2D mapA,mapB;
+    varying vec2 vUv;
+    float noise(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
+    void main(){
+      float n=noise(floor(vUv*35.));
+      float d=smoothstep(progress-.25,progress+.25,n);
+      gl_FragColor=mix(texture2D(mapA,vUv),texture2D(mapB,vUv),d);
+    }\`,
+});
+// Animate progress 0 → 1`,
+    prompt: `Create a Three.js noise dissolve transition. Two canvas textures (mapA, mapB). Fragment shader: noise = fract(sin(dot(floor(uv*35), vec2(127.1,311.7)))*43758.5). d = smoothstep(progress-0.25, progress+0.25, noise). gl_FragColor = mix(mapA, mapB, d). Animate progress 0→1.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      function mkTex(label,c1,c2,fc){
+        const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+        const cx=cv.getContext('2d');
+        const g=cx.createLinearGradient(0,0,W,H);g.addColorStop(0,c1);g.addColorStop(1,c2);
+        cx.fillStyle=g;cx.fillRect(0,0,W,H);
+        cx.font=`bold ${Math.floor(H*.3)}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
+        cx.fillStyle=fc;cx.fillText(label,W/2,H/2);
+        return new THREE.CanvasTexture(cv);
+      }
+      const texA=mkTex('FROM','#1a0533','#0d2b45','#a78bfa');
+      const texB=mkTex('TO','#052e16','#0c1a2e','#34d399');
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{progress:{value:0},mapA:{value:texA},mapB:{value:texB}},
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float progress;uniform sampler2D mapA,mapB;varying vec2 vUv;
+          float noise(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
+          void main(){
+            float n=noise(floor(vUv*35.));
+            float d=smoothstep(progress-.25,progress+.25,n);
+            gl_FragColor=mix(texture2D(mapA,vUv),texture2D(mapB,vUv),d);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      let prog=0,dir=1;
+      const tick=()=>{
+        raf=requestAnimationFrame(tick);
+        const dt=clock.getDelta();
+        prog+=dir*dt*.45;
+        if(prog>=1.2){prog=1.2;dir=-1;}else if(prog<=-0.2){prog=-0.2;dir=1;}
+        mat.uniforms.progress.value=prog;
+        renderer.render(scene,camera);
+      };
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-trans-pixel',
+    name: 'Pixel Block Transition',
+    cat: 'threejs-transition',
+    engine: 'threejs',
+    tags: ['transition','pixel','blocks','shader','retro','grid'],
+    desc: 'Retro pixel-block wipe: tiles stagger from scene A to scene B in a diagonal wave.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms:{ progress:{value:0}, mapA:{value:texA}, mapB:{value:texB}, cols:{value:10.}, rows:{value:7.} },
+  fragmentShader:\`
+    uniform float progress,cols,rows;
+    uniform sampler2D mapA,mapB; varying vec2 vUv;
+    void main(){
+      vec2 cell=floor(vUv*vec2(cols,rows));
+      float delay=(cell.x/cols+cell.y/rows)*.5;
+      float t=clamp((progress-delay)/(1.-delay+.001),0.,1.);
+      gl_FragColor=mix(texture2D(mapA,vUv),texture2D(mapB,vUv),step(.5,t));
+    }\`,
+});
+// Animate progress 0 → 1`,
+    prompt: `Create a Three.js pixel block transition. Fragment shader divides UV into cols×rows grid. Each cell: delay=(cellX/cols+cellY/rows)*0.5, t=clamp((progress-delay)/(1-delay),0,1). step(0.5,t) flips the tile from mapA to mapB creating a diagonal stagger.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      function mkTex(label,c1,c2,fc){
+        const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+        const cx=cv.getContext('2d');
+        const g=cx.createLinearGradient(0,0,W,H);g.addColorStop(0,c1);g.addColorStop(1,c2);
+        cx.fillStyle=g;cx.fillRect(0,0,W,H);
+        cx.font=`bold ${Math.floor(H*.3)}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
+        cx.fillStyle=fc;cx.fillText(label,W/2,H/2);
+        return new THREE.CanvasTexture(cv);
+      }
+      const texA=mkTex('SCENE A','#1a0533','#1e1b4b','#c4b5fd');
+      const texB=mkTex('SCENE B','#0c2a1a','#012616','#6ee7b7');
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{progress:{value:0},mapA:{value:texA},mapB:{value:texB},cols:{value:10.},rows:{value:7.}},
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float progress,cols,rows;uniform sampler2D mapA,mapB;varying vec2 vUv;
+          void main(){
+            vec2 cell=floor(vUv*vec2(cols,rows));
+            float delay=(cell.x/cols+cell.y/rows)*.5;
+            float t=clamp((progress-delay)/(1.-delay+.001),0.,1.);
+            gl_FragColor=mix(texture2D(mapA,vUv),texture2D(mapB,vUv),step(.5,t));
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      const clock=new THREE.Clock();let raf;
+      let prog=0,dir=1;
+      const tick=()=>{
+        raf=requestAnimationFrame(tick);
+        const dt=clock.getDelta();
+        prog+=dir*dt*.45;
+        if(prog>=1.3){prog=1.3;dir=-1;}else if(prog<=-0.3){prog=-0.3;dir=1;}
+        mat.uniforms.progress.value=prog;
+        renderer.render(scene,camera);
+      };
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+
+  // ─── Three.js: UI ────────────────────────────────────────────────────
+  {
+    id: 'thjs-ui-glow-btn',
+    name: 'Glow Orb Button',
+    cat: 'threejs-ui',
+    engine: 'threejs',
+    tags: ['ui','button','glow','orb','shader','interactive','hover'],
+    desc: 'Interactive 3D button with animated glow orb that intensifies on hover.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms:{ time:{value:0}, hover:{value:0}, label:{value:labelTex} },
+  transparent:true, depthWrite:false,
+  fragmentShader:\`
+    uniform float time,hover; uniform sampler2D label;
+    varying vec2 vUv;
+    void main(){
+      float dist=length(vUv-vec2(.5,.5));
+      float pulse=.8+.2*sin(time*2.5);
+      float glow=(.25+hover*.2)/(dist*7.+.25)*pulse;
+      vec3 col=mix(vec3(.45,.05,.85),vec3(.05,.6,.95),vUv.x)*glow;
+      float rim=smoothstep(.42,.45,dist)*smoothstep(.5,.46,dist);
+      col+=rim*vec3(.7,.4,1.)*(1.+hover);
+      vec4 lbl=texture2D(label,vUv);
+      col=mix(col,lbl.rgb,lbl.a*.7);
+      gl_FragColor=vec4(col,clamp(glow*.9+rim*.8,0.,1.));
+    }\`,
+});
+el.addEventListener('mouseenter',()=>mat.uniforms.hover.value=1);
+el.addEventListener('mouseleave',()=>mat.uniforms.hover.value=0);`,
+    prompt: `Create a Three.js glowing orb button. Fragment shader: glow = intensity/(distance_from_center*scale+offset)*pulse where pulse=0.8+0.2*sin(time). Add a rim highlight at the edge. hover uniform (0/1) increases intensity on mouseenter/mouseleave. Draw label text on CanvasTexture and blend in.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x080818,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block',cursor:'pointer'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const tc=document.createElement('canvas');tc.width=W;tc.height=H;
+      const tx=tc.getContext('2d');
+      tx.clearRect(0,0,W,H);
+      tx.font=`bold ${Math.floor(H*.18)}px sans-serif`;tx.textAlign='center';tx.textBaseline='middle';
+      tx.fillStyle='rgba(220,200,255,0.9)';tx.fillText('HOVER ME',W/2,H/2);
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},hover:{value:0},label:{value:new THREE.CanvasTexture(tc)}},
+        transparent:true,depthWrite:false,
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time,hover;uniform sampler2D label;varying vec2 vUv;
+          void main(){
+            float dist=length(vUv-vec2(.5,.5));
+            float pulse=.8+.2*sin(time*2.5);
+            float glow=(.25+hover*.2)/(dist*7.+.25)*pulse;
+            vec3 col=mix(vec3(.45,.05,.85),vec3(.05,.6,.95),vUv.x+sin(time*.5)*.1)*glow;
+            float rim=smoothstep(.42,.45,dist)*smoothstep(.5,.46,dist);
+            col+=rim*vec3(.7,.4,1.)*(1.+hover);
+            vec4 lbl=texture2D(label,vUv);
+            col=mix(col,lbl.rgb,lbl.a*.7);
+            gl_FragColor=vec4(col,clamp(glow*.9+rim*.8,0.,1.));
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      renderer.domElement.addEventListener('mouseenter',()=>{mat.uniforms.hover.value=1;});
+      renderer.domElement.addEventListener('mouseleave',()=>{mat.uniforms.hover.value=0;});
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-ui-ripple',
+    name: 'Ripple Click Effect',
+    cat: 'threejs-ui',
+    engine: 'threejs',
+    tags: ['ui','ripple','click','shader','interactive','button'],
+    desc: 'Click anywhere to spawn an expanding ring ripple that fades out — pure shader, no DOM.',
+    code: `const mat = new THREE.ShaderMaterial({
+  uniforms:{ time:{value:0}, bg:{value:bgTex}, origin:{value:new THREE.Vector2(.5,.5)}, st:{value:-99.}, asp:{value:W/H} },
+  transparent:true,
+  fragmentShader:\`
+    uniform float time,st,asp; uniform vec2 origin;
+    uniform sampler2D bg; varying vec2 vUv;
+    void main(){
+      vec4 base=texture2D(bg,vUv);
+      float age=time-st;
+      vec2 d=(vUv-origin)*vec2(asp,1.);
+      float dist=length(d);
+      float radius=age*.55;
+      float ring=smoothstep(.025,0.,abs(dist-radius))*(1.-smoothstep(0.,.5,age*.8));
+      vec3 rCol=mix(vec3(.4,.7,1.),vec3(.7,.3,1.),dist*2.);
+      gl_FragColor=vec4(mix(base.rgb,rCol,ring*.9),1.);
+    }\`,
+});
+el.addEventListener('click', e => {
+  mat.uniforms.origin.value.set(e.offsetX/W, 1.-e.offsetY/H);
+  mat.uniforms.st.value = clock.getElapsedTime();
+});`,
+    prompt: `Create a Three.js click ripple shader. On click record UV origin and startTime. Fragment shader: age=time-startTime, radius=age*speed, ring=smoothstep(thickness,0,abs(length((uv-origin)*aspect)-radius))*(1-fade(age)). Blend ring colour over background texture.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x0c0c1e,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block',cursor:'crosshair'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+      const tc=document.createElement('canvas');tc.width=W;tc.height=H;
+      const tx=tc.getContext('2d');
+      const g=tx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0c0c1e');g.addColorStop(1,'#1a0533');
+      tx.fillStyle=g;tx.fillRect(0,0,W,H);
+      tx.font=`bold ${Math.floor(H*.18)}px sans-serif`;tx.textAlign='center';tx.textBaseline='middle';
+      tx.fillStyle='rgba(180,160,255,0.4)';tx.fillText('CLICK TO RIPPLE',W/2,H/2);
+      const clock=new THREE.Clock();
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0},bg:{value:new THREE.CanvasTexture(tc)},origin:{value:new THREE.Vector2(.5,.5)},st:{value:-99.},asp:{value:W/H}},
+        transparent:true,
+        vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,1.);}`,
+        fragmentShader:`
+          uniform float time,st,asp;uniform vec2 origin;uniform sampler2D bg;varying vec2 vUv;
+          void main(){
+            vec4 base=texture2D(bg,vUv);
+            float age=time-st;
+            vec2 d=(vUv-origin)*vec2(asp,1.);
+            float dist=length(d);
+            float radius=age*.55;
+            float ring=smoothstep(.025,0.,abs(dist-radius))*(1.-smoothstep(0.,.5,age*.8));
+            vec3 rCol=mix(vec3(.4,.7,1.),vec3(.7,.3,1.),dist*2.);
+            gl_FragColor=vec4(mix(base.rgb,rCol,ring*.9),1.);
+          }`,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+      renderer.domElement.addEventListener('click',e=>{
+        const rect=renderer.domElement.getBoundingClientRect();
+        mat.uniforms.origin.value.set((e.clientX-rect.left)/rect.width,1.-(e.clientY-rect.top)/rect.height);
+        mat.uniforms.st.value=clock.getElapsedTime();
+      });
+      let raf;
+      let nextAuto=1.5;
+      const tick=()=>{
+        raf=requestAnimationFrame(tick);
+        const t=clock.getElapsedTime();
+        if(t>nextAuto){mat.uniforms.origin.value.set(.25+Math.random()*.5,.25+Math.random()*.5);mat.uniforms.st.value=t;nextAuto=t+2+Math.random()*2;}
+        mat.uniforms.time.value=t;
+        renderer.render(scene,camera);
+      };
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+  {
+    id: 'thjs-ui-particles',
+    name: 'Floating Particles',
+    cat: 'threejs-ui',
+    engine: 'threejs',
+    tags: ['ui','particles','points','float','ambient','background','shader'],
+    desc: 'Ambient floating particle system using THREE.Points with a glowing dot vertex+fragment shader.',
+    code: `const COUNT=300;
+const pos=new Float32Array(COUNT*3);
+const sz=new Float32Array(COUNT);
+for(let i=0;i<COUNT;i++){
+  pos[i*3]=(Math.random()-.5)*6;
+  pos[i*3+1]=(Math.random()-.5)*4;
+  pos[i*3+2]=(Math.random()-.5)*4;
+  sz[i]=Math.random()*6+2;
+}
+const geo=new THREE.BufferGeometry();
+geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+geo.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
+const mat=new THREE.ShaderMaterial({
+  uniforms:{time:{value:0}},
+  vertexShader:\`
+    attribute float aSize; uniform float time; varying float vA;
+    void main(){
+      vec3 p=position;
+      p.y=mod(position.y+time*.08+2.,4.)-2.;
+      vA=.4+.6*abs(sin(time*aSize*.3+position.x));
+      gl_PointSize=aSize*(1.+.25*sin(time*2.+position.z*3.));
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+    }\`,
+  fragmentShader:\`
+    varying float vA;
+    void main(){
+      float d=length(gl_PointCoord-.5)*2.;
+      float a=(1.-smoothstep(.2,.9,d))*vA;
+      vec3 col=mix(vec3(.5,.3,1.),vec3(.2,.7,1.),gl_PointCoord.y);
+      gl_FragColor=vec4(col,a);
+    }\`,
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+});
+scene.add(new THREE.Points(geo,mat));`,
+    prompt: `Create a Three.js floating particle system using THREE.Points. BufferGeometry with position and aSize attributes. Vertex shader loops particles vertically: p.y=mod(y+time*speed+2,4)-2. Fragment shader draws glowing dot from gl_PointCoord distance. Use AdditiveBlending, transparent, depthWrite:false.`,
+    html: '',
+    animate(c) {
+      const W=c.offsetWidth||240,H=c.offsetHeight||160;
+      const renderer=new THREE.WebGLRenderer({antialias:true});
+      renderer.setSize(W,H);
+      renderer.setClearColor(0x06060f,1);
+      Object.assign(renderer.domElement.style,{width:'100%',height:'100%',display:'block'});
+      c.appendChild(renderer.domElement);
+      const scene=new THREE.Scene();
+      const camera=new THREE.PerspectiveCamera(60,W/H,.1,20);
+      camera.position.z=3;
+      const COUNT=300;
+      const pos=new Float32Array(COUNT*3);
+      const sz=new Float32Array(COUNT);
+      const spd=new Float32Array(COUNT);
+      for(let i=0;i<COUNT;i++){
+        pos[i*3]=(Math.random()-.5)*6;pos[i*3+1]=(Math.random()-.5)*4;pos[i*3+2]=(Math.random()-.5)*4;
+        sz[i]=Math.random()*6+2;spd[i]=.05+Math.random()*.15;
+      }
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+      geo.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
+      geo.setAttribute('aSpd',new THREE.BufferAttribute(spd,1));
+      const mat=new THREE.ShaderMaterial({
+        uniforms:{time:{value:0}},
+        vertexShader:`
+          attribute float aSize,aSpd;uniform float time;varying float vA;
+          void main(){
+            vec3 p=position;
+            p.y=mod(position.y+time*aSpd+2.,4.)-2.;
+            vA=.4+.6*abs(sin(time*aSpd*3.+position.x));
+            gl_PointSize=aSize*(1.+.25*sin(time*2.+position.z*3.));
+            gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+          }`,
+        fragmentShader:`
+          varying float vA;
+          void main(){
+            float d=length(gl_PointCoord-.5)*2.;
+            float a=(1.-smoothstep(.2,.9,d))*vA;
+            vec3 col=mix(vec3(.5,.3,1.),vec3(.2,.7,1.),gl_PointCoord.y);
+            gl_FragColor=vec4(col,a);
+          }`,
+        transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+      });
+      scene.add(new THREE.Points(geo,mat));
+      const clock=new THREE.Clock();let raf;
+      const tick=()=>{raf=requestAnimationFrame(tick);mat.uniforms.time.value=clock.getElapsedTime();renderer.render(scene,camera);};
+      clock.start();tick();
+      return{pause(){cancelAnimationFrame(raf);clock.stop();},resume(){clock.start();tick();}};
+    }
+  },
+
 ];
 
 // ─── Syntax highlighting ──────────────────────────────────────────────
@@ -2220,6 +3171,7 @@ function makeCard(anim) {
   const card = document.createElement('div');
   card.className = 'card';
   card.dataset.category = anim.category;
+  card.dataset.engine   = anim.engine || 'gsap';
   card.dataset.search = `${anim.title} ${anim.desc} ${(anim.tags || []).join(' ')}`.toLowerCase();
 
   card.innerHTML = `
@@ -2267,15 +3219,17 @@ let activeFilter = 'all';
 let searchQuery  = '';
 
 function applyFilters() {
-  let visible = 0;
+  let visible = 0, gsapVis = 0, threeVis = 0;
   document.querySelectorAll('.card').forEach(card => {
     const catOk    = activeFilter === 'all' || card.dataset.category === activeFilter;
     const searchOk = !searchQuery || card.dataset.search.includes(searchQuery);
     const show = catOk && searchOk;
     card.classList.toggle('hidden', !show);
-    if (show) visible++;
+    if (show) { visible++; card.dataset.engine === 'threejs' ? threeVis++ : gsapVis++; }
   });
   document.getElementById('empty').style.display = visible ? 'none' : 'block';
+  const div = document.getElementById('threejs-divider');
+  if (div) div.style.display = (gsapVis > 0 && threeVis > 0) ? 'flex' : 'none';
 }
 
 document.getElementById('filters').addEventListener('click', e => {
@@ -2336,8 +3290,18 @@ ${anim.code}
 });
 
 // ─── Init ─────────────────────────────────────────────────────────────
-document.querySelector('.subtitle').textContent =
-  `${ANIMS.length} animations · hover preview to pause · click Copy to grab code`;
+document.getElementById('anim-count').textContent =
+  `${ANIMS.length} animations · hover to pause · Copy Code or Copy Prompt`;
 
 const grid = document.getElementById('grid');
-ANIMS.forEach(anim => grid.appendChild(makeCard(anim)));
+const gsapAnims  = ANIMS.filter(a => !a.engine || a.engine === 'gsap');
+const threeAnims = ANIMS.filter(a => a.engine === 'threejs');
+
+gsapAnims.forEach(anim => grid.appendChild(makeCard(anim)));
+
+const divider = document.createElement('div');
+divider.className = 'section-divider'; divider.id = 'threejs-divider';
+divider.innerHTML = '<div class="div-line"></div><span class="div-label">✦ Three.js</span><div class="div-line"></div>';
+grid.appendChild(divider);
+
+threeAnims.forEach(anim => grid.appendChild(makeCard(anim)));
